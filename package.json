@@ -1,0 +1,14 @@
+{
+	"name": "telegram-bot-domain",
+	"version": "1.0.0",
+	"author": "PeterCxy",
+	"description": "Domain utility module for telegram-bot-coffee",
+	"license": "GPL-3.0.0",
+	"homepage": "https://github.com/PeterCxy/telegram-bot-domain",
+	"dependencies": {
+		"telegram-bot-coffee": ">=1.0.0",
+		"node-whois": ">=2.1.2",
+		"korubaku": ">=1.0.1"
+	},
+	"main": "./lib/functions"
+}
