@@ -26,8 +26,20 @@ exports.setup = (telegram, store, server) ->
 					if result.indexOf('No match for domain') >= 0
 						telegram.sendMessage msg.chat.id, "Domain #{domain} has not been registered yet."
 					else
-						[_, name, ...] = /\nRegistrant Name: (.*?)\n/g.exec result
-						[_, email, ...] = /\nRegistrant Email: (.*?)\n/g.exec result
+						r1 = /\nRegistrant Name: (.*?)\n/g.exec result
+						r2 = /\nRegistrant Email: (.*?)\n/g.exec result
+
+						name = 'NaN'
+						email = 'NaN'
+
+						if r1? and r2? and r1.length > 1 and r2.length > 1
+							name = r1[1]
+							email = r2[1]
+						else
+							r3 = /\nDomain Owners \/ Registrant \nName: (.*?) \n/g.exec result
+							if r3? and r3.length > 1
+								name = r3[1]
+
 						telegram.sendMessage msg.chat.id, "Domain #{domain} has been registered by #{name} (#{email})."
 	]
 
