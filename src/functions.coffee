@@ -23,24 +23,12 @@ exports.setup = (telegram, store, server) ->
 			act: (msg, domain) ->
 				korubaku (ko) =>
 					[result] = yield lookup store, domain, ko.raw()
-					if result.indexOf('No match for domain') >= 0
+					info = parse domain, result
+
+					if !info?
 						telegram.sendMessage msg.chat.id, "Domain #{domain} has not been registered yet."
 					else
-						r1 = /\nRegistrant Name: (.*?)\n/g.exec result
-						r2 = /\nRegistrant Email: (.*?)\n/g.exec result
-
-						name = 'NaN'
-						email = 'NaN'
-
-						if r1? and r2? and r1.length > 1 and r2.length > 1
-							name = r1[1]
-							email = r2[1]
-						else
-							r3 = /\nDomain Owners \/ Registrant \nName: (.*?) \n/g.exec result
-							if r3? and r3.length > 1
-								name = r3[1]
-
-						telegram.sendMessage msg.chat.id, "Domain #{domain} has been registered by #{name} (#{email})."
+						telegram.sendMessage msg.chat.id, "Domain #{domain} has been registered by #{info.name} (#{info.email})."
 	]
 
 lookup = (store, domain, callback) ->
@@ -50,3 +38,38 @@ lookup = (store, domain, callback) ->
 			result = yield whois.lookup domain, ko.default()
 			yield store.put 'whois', domain, result, ko.default()
 		callback result, domain
+
+parse = (domain, info) ->
+	lower = if info? then info.toLowerCase().trim() else ''
+	if lower is '' or lower.indexOf('no match for') >= 0 or lower.indexOf('not found') >= 0
+		return null
+
+	suffix = domain[(domain.lastIndexOf('.') + 1)..]
+	console.log "domain suffix #{suffix}"
+	switch suffix
+		when 'im' then  return parseIm info
+		else return parseDef info
+
+parseIm = (info) ->
+	result =
+		name: 'NaN'
+		email: 'NaN'
+
+	for line in info.split('\r\n')
+		if line.startsWith 'Name:'
+			result['name'] = line[6...].trim()
+	
+	return result
+
+parseDef = (info) ->
+	result =
+		name: 'NaN'
+		email: 'NaN'
+
+	for line in info.split('\n')
+		if line.startsWith 'Registrant Name:'
+			result['name'] = line[17...].trim()
+		else if line.startsWith 'Registrant Email:'
+			result['email'] = line[18...].trim()
+	
+	return result
