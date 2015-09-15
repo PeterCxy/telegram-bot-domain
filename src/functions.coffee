@@ -35,8 +35,9 @@ lookup = (store, domain, callback) ->
 	korubaku (ko) =>
 		[err, result] = yield store.get 'whois', domain, ko.raw()
 		if err? or !result? or result.trim() is ''
-			result = yield whois.lookup domain, ko.default()
-			yield store.put 'whois', domain, result, ko.default()
+			[err, result] = yield whois.lookup domain, ko.raw()
+			if !err? and result?
+				yield store.put 'whois', domain, result, ko.default()
 		callback result, domain
 
 parse = (domain, info) ->
