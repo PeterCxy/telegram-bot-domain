@@ -36,19 +36,22 @@ lookup = (store, domain, callback) ->
 		[err, result] = yield store.get 'whois', domain, ko.raw()
 		if err? or !result? or result.trim() is ''
 			[err, result] = yield whois.lookup domain, ko.raw()
-			if !err? and result?
+			if !err? and result?6
 				yield store.put 'whois', domain, result, ko.default()
 		callback result, domain
 
 parse = (domain, info) ->
 	lower = if info? then info.toLowerCase().trim() else ''
-	if lower is '' or lower.indexOf('no match for') >= 0 or lower.indexOf('not found') >= 0
+	if lower is '' or lower.indexOf('no match for') >= 0 or
+			lower.indexOf('not found') >= 0 or lower.indexOf('available for') >= 0
+
 		return null
 
 	suffix = domain[(domain.lastIndexOf('.') + 1)..]
 	console.log "domain suffix #{suffix}"
 	switch suffix
-		when 'im' then  return parseIm info
+		when 'im' then return parseIm info
+		when 'io' then return parseIo info
 		else return parseDef info
 
 parseIm = (info) ->
@@ -60,6 +63,20 @@ parseIm = (info) ->
 		if line.startsWith 'Name:'
 			result['name'] = line[6...].trim()
 	
+	return result
+
+parseIo = (info) ->
+	result =
+		name: ''
+		email: 'NaN'
+	
+	names = []
+
+	for line in info.split('\n')
+		if line.startsWith 'Owner  :'
+			names.push line[9...].trim()
+	
+	result.name = names.join ', '
 	return result
 
 parseDef = (info) ->
