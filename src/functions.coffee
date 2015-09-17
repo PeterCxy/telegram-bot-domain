@@ -88,7 +88,7 @@ parseCn = (info) ->
 	
 	for line in info.split('\n')
 		if line.startsWith 'Registrant:'
-			result['name'] = line[13...].trim()
+			result['name'] = line[12...].trim()
 		else if line.startsWith 'Registrant Contact Email:'
 			result['email'] = line[26...].trim()
 	
