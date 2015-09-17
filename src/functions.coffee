@@ -103,7 +103,7 @@ parseDef = (info) ->
 		if line.startsWith 'Registrant Name:'
 			result['name'] = line[17...].trim()
 		else if line.startsWith 'Registrant Organization:'
-			result['name'] = line[25...].trim()
+			result['name'] = line[25...].trim() if line.indexOf('N/A') < 0
 		else if line.startsWith 'Registrant Email:'
 			result['email'] = line[18...].trim()
 	
