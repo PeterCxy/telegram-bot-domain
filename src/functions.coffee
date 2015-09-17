@@ -52,6 +52,7 @@ parse = (domain, info) ->
 	switch suffix
 		when 'im' then return parseIm info
 		when 'io' then return parseIo info
+		when 'cn' then return parseCn info
 		else return parseDef info
 
 parseIm = (info) ->
@@ -77,6 +78,19 @@ parseIo = (info) ->
 			names.push line[9...].trim()
 	
 	result.name = names.join ', '
+	return result
+
+parseCn = (info) ->
+	result =
+		name: 'NaN'
+		email: 'NaN'
+	
+	for line in info.split('\n')
+		if line.startsWith 'Registrant:'
+			result['name'] = line[13...].trim()
+		else if line.startsWith 'Registrant Contact Email:'
+			result['email'] = line[26...].trim()
+	
 	return result
 
 parseDef = (info) ->
