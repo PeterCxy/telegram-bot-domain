@@ -43,7 +43,8 @@ lookup = (store, domain, callback) ->
 parse = (domain, info) ->
 	lower = if info? then info.toLowerCase().trim() else ''
 	if lower is '' or lower.indexOf('no match for') >= 0 or
-			lower.indexOf('not found') >= 0 or lower.indexOf('available for') >= 0
+			lower.indexOf('not found') >= 0 or lower.indexOf('available for') >= 0 or
+			lower.indexOf('error') >= 0
 
 		return null
 
